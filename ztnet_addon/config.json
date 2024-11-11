@@ -1,0 +1,24 @@
+{
+    "name": "ZTNET Add-on",
+    "version": "1.0",
+    "slug": "ztnet_addon",
+    "description": "Runs ZTNET services using Docker Compose.",
+    "startup": "services",
+    "boot": "auto",
+    "host_network": false,
+    "hassio_api": false,
+    "hassio_role": "default",
+    "auth_api": false,
+    "homeassistant_api": false,
+    "ports": {
+      "3001/tcp": 3000, 
+      "9993/udp": 9993
+    },
+    "map": [
+      "config:rw",
+      "ssl"
+    ],
+    "options": {},
+    "schema": {}
+  }
+  
