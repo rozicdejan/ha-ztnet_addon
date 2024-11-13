@@ -1,0 +1,133 @@
+networks:
+  rustdesk-net:
+    external: false
+  app-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.31.254.0/24
+
+services:
+  # RustDesk Services
+  hbbs:
+    container_name: rustdesk_hbbs01
+    ports:
+      - 4415:21115
+      - 44116:21116
+      - 44116:21116/udp
+      - 44118:21118
+    image: rustdesk/rustdesk-server:latest
+    command: hbbs -r 127.0.0.1:21117 -k _
+    volumes:
+      - ./hbbs:/root
+    networks:
+      - rustdesk-net
+    depends_on:
+      - hbbr
+    restart: unless-stopped
+
+  hbbr:
+    container_name: rustdesk_hbbr01
+    ports:
+      - 44117:21117
+      - 44119:21119
+    image: rustdesk/rustdesk-server:latest
+    command: hbbr -k _
+    volumes:
+      - ./hbbr:/root
+    networks:
+      - rustdesk-net
+    restart: unless-stopped
+
+  # ZeroTier Services
+  postgres:
+    image: postgres:15.2-alpine
+    container_name: ztnet_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ztnet
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  zerotier:
+    image: zyclonite/zerotier:1.14.0
+    hostname: zerotier
+    container_name: ztnet_zerotier
+    restart: unless-stopped
+    volumes:
+      - zerotier:/var/lib/zerotier-one
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    networks:
+      - app-network
+    ports:
+      - "9993:9993/udp"
+    environment:
+      - ZT_OVERRIDE_LOCAL_CONF=true
+      - ZT_ALLOW_MANAGEMENT_FROM=172.31.254.0/24
+
+  ztnet:
+    image: sinamics/ztnet:latest
+    container_name: ztnet_app
+    working_dir: /app
+    volumes:
+      - zerotier:/var/lib/zerotier-one
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    environment:
+      POSTGRES_HOST: ztnet_postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ztnet
+      NEXTAUTH_URL: "http://192.168.170.176:3000"
+      NEXTAUTH_SECRET: "random_secret"
+      NEXTAUTH_URL_INTERNAL: "http://ztnet_app:3000"
+    networks:
+      - app-network
+    links:
+      - postgres
+    depends_on:
+      - postgres
+      - zerotier
+
+  ############################################################################
+  #                                                                          #
+  # Uncomment the section below to enable HTTPS reverse proxy with Caddy.    #
+  #                                                                          #
+  # Steps:                                                                   #
+  # 1. Replace <YOUR-PUBLIC-HOST-NAME> with your actual public domain name.  #
+  # 2. Uncomment the caddy_data volume definition in the volumes section.    #
+  #                                                                          #
+  ############################################################################
+
+  # https-proxy:
+  #   image: caddy:latest
+  #   container_name: ztnet_caddy
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - ztnet
+  #   command: caddy reverse-proxy --from <YOUR-PUBLIC-HOST-NAME> --to ztnet_app:3000
+  #   volumes:
+  #     - caddy_data:/data
+  #   networks:
+  #     - app-network
+  #   links:
+  #     - ztnet
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+
+volumes:
+  zerotier:
+  postgres-data:
+  # caddy_data:
