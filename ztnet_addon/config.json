@@ -1,6 +1,6 @@
 {
     "name": "ZTNET Add-on with zerotier",
-    "version": "1.3",
+    "version": "1.4",
     "slug": "ztnet_addon",
     "description": "Runs ZTNET services using Docker Compose.",
     "startup": "services",
@@ -13,7 +13,7 @@
     "homeassistant_api": false,
     "webui": "http://[HOST]:[PORT:3010]",
     "ports": {
-      "3003/tcp": 3000, 
+      "3010/tcp": 3000, 
       "9994/udp": 9993
     },
     "map": [
