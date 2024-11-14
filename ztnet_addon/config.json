@@ -12,7 +12,7 @@
     "auth_api": false,
     "homeassistant_api": false,
     "ports": {
-      "3002/tcp": 3000, 
+      "3003/tcp": 3000, 
       "9994/udp": 9993
     },
     "map": [
