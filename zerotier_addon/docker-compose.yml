@@ -82,14 +82,14 @@ services:
       - zerotier:/var/lib/zerotier-one
     restart: unless-stopped
     ports:
-      - 3000:3000
+      - 3010:3000
     environment:
       POSTGRES_HOST: ztnet_postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ztnet
-      NEXTAUTH_URL: "http://192.168.170.176:3000"
+      NEXTAUTH_URL: "http://192.168.107.225:3010"
       NEXTAUTH_SECRET: "random_secret"
       NEXTAUTH_URL_INTERNAL: "http://ztnet_app:3000"
     networks:
