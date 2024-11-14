@@ -1,0 +1,12 @@
+{
+    "name": "RustDesk and ZeroTier Add-on",
+    "version": "1.0",
+    "slug": "rustdesk_zerotier",
+    "description": "RustDesk and ZeroTier server setup using Docker Compose",
+    "startup": "application",
+    "boot": "manual",
+    "options": {},
+    "schema": {},
+    "arch": ["amd64", "armv7", "armhf", "aarch64"]
+  }
+  
